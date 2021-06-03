@@ -209,7 +209,7 @@ S3Storage.prototype._handleFile = function (req, file, cb) {
 
 S3Storage.prototype._removeFile = function (req, file, cb) {
   this.s3(req, file, (s3Obj) => s3Obj.deleteObject({ Bucket: file.bucket, Key: file.key }, cb))
-})
+}
 
 module.exports = function (opts) {
   return new S3Storage(opts)
