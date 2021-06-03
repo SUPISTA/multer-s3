@@ -84,7 +84,8 @@ function collect (storage, req, file, cb) {
 
 function S3Storage (opts) {
   switch (typeof opts.s3) {
-    case 'object': this.s3 = opts.s3; break
+    case 'object': this.s3 = staticValue(opts.s3); break
+    case 'function': this.s3 = opts.s3; break
     default: throw new TypeError('Expected opts.s3 to be object')
   }
 
@@ -178,8 +179,8 @@ S3Storage.prototype._handleFile = function (req, file, cb) {
     if (opts.contentDisposition) {
       params.ContentDisposition = opts.contentDisposition
     }
-
-    var upload = this.s3.upload(params)
+    var s3 = opts.s3;
+    var upload = s3.upload(params)
 
     upload.on('httpUploadProgress', function (ev) {
       if (ev.total) currentSize = ev.total
@@ -207,8 +208,8 @@ S3Storage.prototype._handleFile = function (req, file, cb) {
 }
 
 S3Storage.prototype._removeFile = function (req, file, cb) {
-  this.s3.deleteObject({ Bucket: file.bucket, Key: file.key }, cb)
-}
+  this.s3(req, file, (s3Obj) => s3Obj.deleteObject({ Bucket: file.bucket, Key: file.key }, cb))
+})
 
 module.exports = function (opts) {
   return new S3Storage(opts)
